@@ -5,9 +5,10 @@ public class Main {
 	
 
 	public static void main(String[] args) {
-	
+		
+		String currentDir=System.getProperty("user.dir");
 
-		Receipt r1 = new Receipt("C:\\Users\\99002538\\eclipse-workspace\\SalesTax_Challenge\\test_1.txt");	
+		Receipt r1 = new Receipt(currentDir+"/test_1.txt");	
 		
 		r1.calculateTotal();
 		
@@ -17,7 +18,7 @@ public class Main {
 		
 		System.out.println();
 
-		Receipt r2 = new Receipt("C:\\Users\\99002538\\eclipse-workspace\\SalesTax_Challenge\\test_2.txt");
+		Receipt r2 = new Receipt(currentDir+"/test_2.txt");
 
 		r2.calculateTotal();
 		
@@ -27,7 +28,7 @@ public class Main {
 		
 		System.out.println();
 		
-		Receipt r3 = new Receipt("C:\\Users\\99002538\\eclipse-workspace\\SalesTax_Challenge\\test_3.txt");
+		Receipt r3 = new Receipt(currentDir+"/test_3.txt");
 		
 		r3.calculateTotal();
 		
