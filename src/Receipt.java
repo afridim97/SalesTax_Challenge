@@ -22,11 +22,11 @@ public class Receipt {
 		
 		try{
 			
-		Scanner in=new Scanner(System.in);
+		Scanner in=new Scanner(System.in); //creates a Scanner object
 		
-		File file=new File(inputFileName);
+		File file=new File(inputFileName); //create a File object
 		
-		in=new Scanner(file);
+		in=new Scanner(file); //initialise Scanner object with the file
 		
 		while(in.hasNextLine()) {
 				
