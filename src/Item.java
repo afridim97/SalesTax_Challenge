@@ -66,7 +66,7 @@ public class Item {
 		
 		this.itemType=ItemType.OTHERS;
 		
-		this.exemptedItems=new ArrayList<String>(Arrays.asList("book","chocolates","pills"));
+		this.exemptedItems=new ArrayList<String>(Arrays.asList("book","books","chocolate","chocolates","pill","pills"));
 		
 	}
 	
