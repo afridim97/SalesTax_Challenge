@@ -1,8 +1,6 @@
 
 import java.io.File;
 import java.util.*;
-import java.math.*;
-import java.text.DecimalFormat;
 
 public class Receipt {
 
@@ -11,22 +9,22 @@ public class Receipt {
 	 * totals of tax and overall total price for customer respectively
 	 */
 	
-	private List<Product> products=new ArrayList<>();
+	private List<Item> items=new ArrayList<>();
 	
 	private double totalTax;
 	
-	private double totalPrice;
+	private double total;
 	
 	@SuppressWarnings("resource")
 	Receipt(String inputFileName){
 		
 		try{
 			
-		Scanner in=new Scanner(System.in); //creates a Scanner object
+		Scanner in=new Scanner(System.in);
 		
-		File file=new File(inputFileName); //create a File object
+		File file=new File(inputFileName);
 		
-		in=new Scanner(file); //initialise Scanner object with the file
+		in=new Scanner(file);
 		
 		while(in.hasNextLine()) {
 				
@@ -35,155 +33,42 @@ public class Receipt {
 			* e.g. "1 imported chocolate at 12.50"
 			*/
 			
-			String line=in.nextLine(); 
+			String line=in.nextLine();
 			
-			// Array contains only the words in the line
+			int quantity=parseInput(line);
 			
-			String[] words=line.split(" ");
-			
-			//first word will be quantity of product being purchased
-			
-			int quantity=Integer.parseInt(words[0]);
-			
-			//check for any mention of product being imported
-			
-			boolean isImported=line.contains("imported");
-			
-			String[] itemsExempted =  new String[]{"book","chocolate","pills","meds"};
-			
-			int exemptedIndex=checkIfItemExempted(line,itemsExempted);
-			
-			String exemptedItem=null;
-			
-			if(exemptedIndex!=-1) {
-				
-				/**
-				 * If item is exempt of sales tax
-				 */
-				
-				exemptedItem=itemsExempted[exemptedIndex];
-				
-			}
-		
-			int splitIndex=line.lastIndexOf("at");
-			
-			if(splitIndex==-1) {
-				
-				System.out.println("Bad format");
-				
-			}
-			
-			else {
-				
-				//after "at " comes the price
-				
-				Float price=Float.parseFloat(line.substring(splitIndex+2));
-				
-				//everything between quantity and price is name
-				
-				String name=line.substring(1,splitIndex);
-				
-			
-			//collecting all the products
+			Item item=null;
 			
 			for(int i=0;i<quantity;i++) {
-				
-				Product newProduct=null;
-				
-				/**
-				 * Three types of categories:
-				 * 1) Imported and exempted from sales tax
-				 * 
-				 * 2) Imported and not exempt from sales tax
-				 * 
-				 * 3) Domestic and not exempt from sales tax
-				 */
-				
-		if(isImported) {
 			
-				//if product is imported 
-				if(exemptedItem!=null) {
-					
-					//the product is imported + exempt of sales tax
-					
-					if(exemptedItem.equals("book")) {
-						
-						newProduct=new Product(name,price,Item.IMPORTED_BOOK);
-						
-					}
-					
-					if(exemptedItem.equals("chocolate")) {
-						
-						newProduct=new Product(name,price,Item.IMPORTED_FOOD);
-						
-					}
-					
-					if(exemptedItem.equals("pills")) {
-						
-						newProduct=new Product(name,price,Item.IMPORTED_MEDICINES);
-						
-					}
-					
-					
-				}
+				item=createItem(line);
 				
-				else {
-					
-					//product is imported but not exempt from sales tax
-					
-					newProduct=new Product(name,price,Item.IMPORTED_OTHERS);
-					
-				}
+				Taxes tax=new Taxes();
+				
+				total+=tax.calculateTotalBeforeTax(item);
+				
+				double taxRate=tax.calculateTaxRate(item);
+				
+				double taxOnItem=tax.calculateTaxAmount(item,taxRate);
+				
+				item.setPrice(item.getPrice()+taxOnItem);
+				
+				total+=taxOnItem;
+				
+				totalTax+=taxOnItem;
 				
 			}
 		
-		else {
-			
-			if(exemptedItem!=null) {
-				
-				//the product is domestic + exempt of sales tax
-				
-				if(exemptedItem.equals("book")) {
-					
-					newProduct=new Product(name,price,Item.BOOK);
-					
-				}
-				
-				if(exemptedItem.equals("chocolate")) {
-					
-					newProduct=new Product(name,price,Item.FOOD);
-					
-				}
-				
-				if(exemptedItem.equals("pills")) {
-					
-					newProduct=new Product(name,price,Item.MEDICINES);
-					
-				}
-				
-				
+			items.add(item);
+		
 			}
 		
-		
-		else {
-				//product is domestic + not exempt of sales  tax
-				newProduct=new Product(name,price,Item.OTHERS);
-			}
-				
-			
-		}
-		
-		products.add(newProduct);
-		
-				}	
-			
-			}
-			
-		}
 		
 		in.close();
 		
-			}		
+		}
+		
+		
 		catch(Exception e) {
 			
 			e.printStackTrace();
@@ -192,114 +77,92 @@ public class Receipt {
 		
 		}
 	
-	public void calculateTotal(){
+	public int parseInput(String line) {
 		
-		/**
-		 * Calculate total with price of each item added + taxes applicable to it (sales, import)
-		 */
+		String[] details=line.split(" ");
 		
-		int totalItems=products.size();
-	
-		BigDecimal runningTotal=new BigDecimal("0");
+		int quantity=Integer.parseInt(details[0]);
 		
-		BigDecimal runningTax=new BigDecimal("0");
-		
-		for(int i=0;i<totalItems;i++){
-			
-			runningTax=BigDecimal.valueOf(0);
-			
-			BigDecimal totalBeforeTax=new BigDecimal(String.valueOf(this.products.get(i).getPrice()));
-			
-			runningTotal=runningTotal.add(totalBeforeTax);
-			
-			if(products.get(i).isSalesTaxable()) {
-				
-				// (10% sales tax)
-				
-				BigDecimal salesTaxPercent=new BigDecimal(".10");
-				
-				//multiply sales tax % with price of item before tax added
-				
-				BigDecimal salesTax=salesTaxPercent.multiply(totalBeforeTax);
-				
-				//rounding up to the nearest 0.05
-				
-				salesTax = round(salesTax, BigDecimal.valueOf(0.05), RoundingMode.UP);
-				
-				//add tax calculated so far
-				
-			    runningTax=runningTax.add(salesTax);
-				
-			}
-			
-			if(products.get(i).isImportTaxable()) {
-				
-				//5% import tax
-				
-				BigDecimal importTaxPercent=new BigDecimal(".05");
-				
-				//multiply sales tax % with price of item before tax added
-				
-				BigDecimal importTax=importTaxPercent.multiply(totalBeforeTax);
-				
-				//rounding up to the nearest 0.05
-				
-				importTax = round(importTax, BigDecimal.valueOf(0.05), RoundingMode.UP);
-				
-				//add tax calculated so far
-				
-			    runningTax = runningTax.add(importTax);
-				
-			}
-			
-			products.get(i).setPrice(runningTax.floatValue()+products.get(i).getPrice());
-			
-			totalTax+=runningTax.doubleValue();
-			
-			runningTotal=runningTotal.add(runningTax);
-			
-		}
-		
-		//total tax and price after adding all items
-		
-		totalTax=roundToTwoDecimals(totalTax);
-		
-		totalPrice=runningTotal.doubleValue();
-		
+		return quantity;
 		
 	}
 	
-	public static BigDecimal round(BigDecimal value, BigDecimal increment,RoundingMode roundingMode) {
-		/*
-		 * This method handles custom rounding to 0.05, and also sets the BigDecimal numbers to use 2 decimals
-		 * 
-		 */
-		if (increment.signum()==0) {
-		//if value to be incremented by is 0, no need to proceed further
+	Item createItem(String line) {
 		
-			return value;
+		int splitIndex=line.lastIndexOf("at");
 		
-		} 
+		double price=Double.parseDouble(line.substring((splitIndex+2)));
+		
+		String name=line.substring(1,splitIndex);
+		
+		ItemType itemType=findItemType(name);
+		
+		return new Item(name,price,itemType);
+		
+	}
+	
+	ItemType findItemType(String name){
+		
+		String[] exemptedItems= {"book","chocolate","pills"};
+		
+		int isExempted=checkIfItemExempted(name,exemptedItems);
+		
+		String exemptedType=null;
+		
+		if(isExempted!=-1)
+			exemptedType=exemptedItems[isExempted];
+		
+		if(name.contains("imported")){
+			
+			//if exempted, sales tax is excluded but import tax applies
+			
+			if(exemptedType!=null) {
+			
+			if(exemptedType.equals("book"))
+				return ItemType.IMPORTED_BOOK;
+			
+			if(exemptedType.equals("chocolate"))
+				return ItemType.IMPORTED_FOOD;
+			
+			if(exemptedType.equals("pills"))
+				return ItemType.IMPORTED_MEDICINES;
+					
+			}
+			
+			else
+				return ItemType.IMPORTED_OTHERS;
+			
+		}
+		
 		else {
 			
-			BigDecimal divided = value.divide(increment, 0, roundingMode);
+			/**
+			 * Items bought locally, so import tax not applicable
+			 * If item is exempted, sales tax also not applicable
+			 */
 			
-			BigDecimal result = divided.multiply(increment);
-			
-			result.setScale(2, RoundingMode.UNNECESSARY);
-			
-			return result;
-		}
+			if(exemptedType!=null){
+				
+				
+				if(exemptedType.equals("book"))
+					return ItemType.BOOK;
+				
+				if(exemptedType.equals("chocolate"))
+					return ItemType.FOOD;
+				
+				if(exemptedType.equals("pills"))
+					return ItemType.MEDICINES;
+						
+				}
+		
+			}
+		
+		//if item bought domestically and not exempted
+		
+		return ItemType.OTHERS;
 		
 	}
 	
-	public double roundToTwoDecimals(double d) {
-		//A rounding method for double values to 2 decimals
-		
-	    DecimalFormat twoDecimalForm = new DecimalFormat("#.##");
-	    
-	    return Double.valueOf(twoDecimalForm.format(d));
-	}
 		
 	public static int checkIfItemExempted(String line,String[] exemptedItems) {
 	
@@ -323,12 +186,12 @@ public class Receipt {
 		 * Print all the information about the Receipt  
 		 * 
 		 */
-		int numOfItems = products.size();
+		int numOfItems = items.size();
 		for(int i = 0;i<numOfItems;i++){
-			System.out.println("1" + products.get(i).getName() + "at " + products.get(i).getPrice());
+			System.out.println("1" + items.get(i).getName() + "at " + (float)items.get(i).getPrice());
 		}
 		System.out.printf("Sales Tax: %.2f\n", totalTax);
-		System.out.println("Total: " + totalPrice);
+		System.out.println("Total: " + (float)total);
 	}
 		
 	
