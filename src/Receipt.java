@@ -42,7 +42,9 @@ public class Receipt {
 			
 			String line=in.nextLine();
 			
-			item=new Item();
+			ItemFactory itemfact=new ItemFactory();
+			
+			
 			
 			//initialise Item object with parameters given in input line
 			

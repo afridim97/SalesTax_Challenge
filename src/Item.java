@@ -1,98 +1,46 @@
 
 import java.util.*;
 
-enum ItemType{
-	
-	//sales tax exempted domestic list
-	BOOK(true,false),
-	MEDICINES(true,false),
-	FOOD(true,false),
-	
-	//sales tax non-exempted domestic list
-	OTHERS (false,false),
-	
-	//sales tax exempted imported list
-	IMPORTED_BOOK(true,true),
-	IMPORTED_MEDICINES(true,true),
-	IMPORTED_FOOD(true,true),
-	
-	//non sales tax exempted imported list 
-	IMPORTED_OTHERS(false,true);
+abstract class Item {
 
-	
-	private boolean isExempted;
-	
-	private boolean isImported;
-	
-	ItemType(boolean exempted,boolean imported){
-		
-		this.isExempted=exempted;
-		
-		this.isImported=imported;
-	}
-	
-	public boolean isImported() {
-		
-		return isImported;
-		
-	}
-	
-	public boolean isExempted() {
-		
-		return isExempted;
-		
-	}
-	
-	
-}
-
-
-public class Item {
-
-	private String name;
+	private String itemType;
 	private double price;
 	private int quantity;
-	private ItemType itemType;
-	
-	private List<String> exemptedItems;
+	private boolean exempted;
+	private boolean imported;
 	
 	public Item(){
 		
-		this.name="";
+		this.itemType="";
 		
 		this.price=0.0;
 		
 		this.quantity=0;
 		
-		this.itemType=ItemType.OTHERS;
+		this.exempted=false;
 		
-		this.exemptedItems=new ArrayList<String>(Arrays.asList("book","books","chocolate","chocolates","pill","pills"));
+		this.imported=false;
 		
 	}
 	
-	/*
-	 * public Item(String name, double price, int quantity, ItemType itemType) {
+
+	  public Item(String itemType, double price, int quantity, boolean exempted, boolean imported) {
 		
-		this.setName(name);
+		this.setItemType(itemType);
 		
 		this.setPrice(price);
-		
-		this.itemType = itemType;
-		
+			
 		this.setQuantity(quantity);
 		
-	}
-	
-	 */
-	public List<String> getExemptedItems(){
+		this.exempted=exempted;
 		
-		return exemptedItems;
+		this.imported=imported;
 		
 	}
 	
 
 	public String toString(){
-		return this.name + this.getPrice();
+		return this.itemType+this.getPrice();
 	}
 
 	public double getPrice() {
@@ -114,34 +62,22 @@ public class Item {
 		this.price = price;
 	}
 	
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public ItemType getItemType() {
-		
+	public String getItemType() {
 		return itemType;
-		
 	}
-	
-	public void setItemType(ItemType itemType) {
-		
+
+	public void setItemType(String itemType) {
 		this.itemType=itemType;
+	}
+
+	boolean isExempted() {
 		
+		return this.exempted;
 	}
 	
-	public boolean isSalesTaxable() {
-		return !this.itemType.isExempted();
+	boolean isImported() {
+		
+		return this.imported;
 	}
-
-	public boolean isImportTaxable() {
-		return this.itemType.isImported();
-	}
-
-	
 	
 }
