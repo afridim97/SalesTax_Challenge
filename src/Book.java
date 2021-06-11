@@ -8,7 +8,7 @@ public class Book extends Item{
 	
 	Book(String itemType,double price,int quantity,boolean exempted,boolean imported){
 		
-		super(itemType,price,quantity,exempted,imported);
+		super(itemType,price,quantity,true,imported);
 		
 	}
 	

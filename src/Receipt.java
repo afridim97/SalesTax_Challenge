@@ -42,34 +42,51 @@ public class Receipt {
 			
 			String line=in.nextLine();
 			
+			String[] words=line.split(" ");
+			
+			String name="";
+			
 			ItemFactory itemfact=new ItemFactory();
 			
+			if(!line.contains("imported")) {
+				
+				name=words[1];
+				
+				item=itemfact.getItem(name);
+				
+				item.imported=false;
+				
+			}
 			
-			
+			else {
+				
+				name=words[2];
+				
+				item=itemfact.getItem(name);
+				
+				item.imported=true;
+				
+			}
+					
 			//initialise Item object with parameters given in input line
 			
-			createItem(line);
-			
-			
-			for(int i=0;i<item.getQuantity();i++) {
-					
-				Taxes tax=new Taxes();
+				createItem(line);
 				
 				//price before applying tax
 				
-				total+=tax.calculateTotalBeforeTax(item);
+				total+=calculateTotalBeforeTax(item);
 				
 				//finding total of sales + import tax rate, wherever applicable
 				
-				double taxRate=tax.calculateTaxRate(item);
-				
 				//calculate tax applied on item
 				
-				double taxOnItem=tax.calculateTaxAmount(item,taxRate);
+				Taxes tax=new Taxes();
+				
+				double taxOnItem=tax.calculateTaxValue(item);
 				
 				//update price of item to include tax on it
 						
-				item.setPrice(item.getPrice()+taxOnItem);
+				item.setPrice((item.getPrice()+taxOnItem)*item.getQuantity());
 				
 				//update total price and cost by adding tax
 				
@@ -77,7 +94,7 @@ public class Receipt {
 				
 				totalTax+=taxOnItem;
 				
-			}
+			//}
 		
 			//add to list of items
 			
@@ -123,127 +140,34 @@ public class Receipt {
 		//update item price accordingly
 		
 		item.setPrice(Double.parseDouble(line.substring((splitIndex+2))));
-		
-		//name is what comes between quantity and price in line
-		
-		item.setName(line.substring(1,splitIndex));
-		
-		//method to find item type based on item name and import/domestic status
-		
-		item.setItemType(findItemType(item.getName()));
+	
 		
 		//first word in line is quantity
 		
 		item.setQuantity(Integer.parseInt(line.substring(0,1)));
 		
+		
+	}
+	
+	
+	double calculateTotalBeforeTax(Item item) {
+		
+		return item.getPrice()*(double)item.getQuantity();
+		
+	}
+	
+	
+	
 
-		
-	}
-	/**
-	 * 
-	 * @param name - name of item
-	 * @return item type based on which we will determine sales and import tax
-	 */
-	
-	ItemType findItemType(String name){
-		
-		//check if given item comes in list of exempted items
-		
-		int indexOfExemptedList=checkIfItemExempted(name,item.getExemptedItems());
-		
-		String exemptedType=null;
-		
-		//if item is contained in list of exempted items, assign that item to exemptedType
-		
-		if(indexOfExemptedList!=-1)
-			exemptedType=item.getExemptedItems().get(indexOfExemptedList);
-		
-		if(name.contains("imported")){
-			
-			//if exempted, sales tax is excluded but import tax applies
-			
-			if(exemptedType!=null) {
-			
-			if(exemptedType.equals("book"))
-				return ItemType.IMPORTED_BOOK;
-			
-			if(exemptedType.equals("chocolates"))
-				return ItemType.IMPORTED_FOOD;
-			
-			if(exemptedType.equals("pills"))
-				return ItemType.IMPORTED_MEDICINES;
-					
-			}
-			
-			else
-				return ItemType.IMPORTED_OTHERS;
-			
-		}
-		
-		else {
-			
-			/**
-			 * Items bought locally, so import tax not applicable
-			 * If item is exempted, sales tax also not applicable
-			 */
-			
-			if(exemptedType!=null){
-				
-				
-				if(exemptedType.equals("book"))
-					return ItemType.BOOK;
-				
-				if(exemptedType.equals("chocolate"))
-					return ItemType.FOOD;
-				
-				if(exemptedType.equals("pills"))
-					return ItemType.MEDICINES;
-						
-				}
-		
-			}
-		
-		//if item bought domestically and not exempted
-		
-		return ItemType.OTHERS;
-		
-	}
-	
-	/**
-	 * 
-	 * @param line - input line
-	 * @param exemptedItems - list of items exempted from sales tax (books, food, medicine)
-	 * @return index of item in exempted items list, if found in input line
-	 */
-		
-	public int checkIfItemExempted(String line, List<String> exemptedItems) {
-	
-		int index=-1;
-		
-		for(int i=0;i<exemptedItems.size();i++) {
-			
-			//return index value of item in exempted items found in line
-			
-			index=line.indexOf(exemptedItems.get(i));
-			
-			if(index!=-1)
-				return i;
-			
-		}
-		
-		return -1;
-		
-	}
-	
 	public void printReceipt(){
 		/*
 		 * Print all the information about the Receipt  
 		 * 
 		 */
 		
-		int numOfItems = items.size();
+		int numOfItems=items.size();
 		for(int i = 0;i<numOfItems;i++){
-			System.out.println(items.get(i).getQuantity() + items.get(i).getName() + "at " + (float)items.get(i).getPrice());
+			System.out.println(items.get(i).getQuantity() + " "+items.get(i).getItemType() + "at " + (float)items.get(i).getPrice());
 		}
 		System.out.printf("Sales Tax: %.2f\n", totalTax);
 		System.out.println("Total: " + (float)total);

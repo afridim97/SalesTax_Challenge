@@ -6,8 +6,8 @@ abstract class Item {
 	private String itemType;
 	private double price;
 	private int quantity;
-	private boolean exempted;
-	private boolean imported;
+	protected boolean exempted;
+	protected boolean imported;
 	
 	public Item(){
 		
@@ -38,7 +38,7 @@ abstract class Item {
 		
 	}
 	
-
+    @Override
 	public String toString(){
 		return this.itemType+this.getPrice();
 	}
