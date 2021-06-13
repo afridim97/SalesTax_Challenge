@@ -1,3 +1,4 @@
+import java.io.FileNotFoundException;
 
 public class genSalesTax{
 		
@@ -6,15 +7,21 @@ public class genSalesTax{
 		
 	String fileLocation=System.getProperty("user.dir");
 		
-	for(int i=0;i<args.length;i++) {
+	//for(int i=0;i<args.length;i++) {
 		
 		//let args[i] be the name of the test file
 		
-		Receipt r= new Receipt(fileLocation+"/"+args[i]);	
+		Billing b= new Billing(fileLocation+"/src/test_1.txt");	
 		
-		r.printReceipt();
-		
+		try{
+			b.addItemToReceipt();
 		}
+		catch(FileNotFoundException e) {
+			
+			System.out.print("Please enter a valid file name");
+		}
+		
+	//}
 	
 	}
 	
