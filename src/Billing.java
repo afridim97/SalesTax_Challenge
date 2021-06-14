@@ -4,6 +4,8 @@ import java.io.*;
 
 public class Billing {
 
+	private Receipt r;
+	
 	private List<Item> items;
 	
 	private String inputFileName;
@@ -29,8 +31,6 @@ public class Billing {
 		File file=new File(inputFileName);
 		
 		Scanner in=new Scanner(file);
-		
-		Taxes tax=new Taxes();
 	
 		while(in.hasNextLine()) {
 				
@@ -38,16 +38,14 @@ public class Billing {
 			
 			initializeItem(line);
 			
-			calculateTotalBeforeTax(item);
-			
-			totalTax+=tax.calculateTaxValue(item);
+			processTax(item);
 			
 			items.add(item);
 		}
 		
 		in.close();
 		
-		generateReceipt(new Receipt(items,totalTax,total));
+		generateReceipt();
 	}
 	
 	
@@ -57,32 +55,12 @@ public class Billing {
 	*/
 	
 	void initializeItem(String line) {
-		
-		String[] words=line.split(" ");
-		
-		String name="";
-		
+			
 		ItemFactory itemfact=new ItemFactory();
 		
-		if(!line.contains("imported")) {
-			
-			name=words[1];
-			
-			item=itemfact.getItem(name);
-			
-			item.imported=false;
-			
-		}
+		item=itemfact.getItem(line);
 		
-		else {
-			
-			name=words[2];
-			
-			item=itemfact.getItem(name);
-			
-			item.imported=true;
-			
-		}
+		item.imported=line.contains("imported")?true:false;
 		
 		setPriceandQuantity(line);
 		
@@ -110,7 +88,6 @@ public class Billing {
 			
 		item.setQuantity(Integer.parseInt(line.substring(0,1)));
 			
-			
 		}
 	
 	double calculateTotalBeforeTax(Item item) {
@@ -119,9 +96,27 @@ public class Billing {
 		
 	}
 	
-	void generateReceipt(Receipt r) {
+	void processTax(Item item) {
 		
-		r=new Receipt(items,totalTax,total);
+		Taxes tax=new Taxes();
+		
+		total+=calculateTotalBeforeTax(item);
+		
+		double taxOnItem=tax.calculateTaxValue(item);
+		
+		total+=(taxOnItem*item.getQuantity());
+		
+		totalTax+=(taxOnItem*item.getQuantity());
+		
+		item.setPrice(item.getPrice()+taxOnItem);
+		
+	}
+	
+	void generateReceipt() {
+		
+		r=new Receipt(items, total, totalTax);
+				
+		r.setItems(items);
 		
 		r.printReceipt();
 		

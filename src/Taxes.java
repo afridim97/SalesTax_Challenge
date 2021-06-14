@@ -3,6 +3,8 @@ class Taxes{
 	
 	private double taxRate;
 	
+	private double taxValue;
+	
 	private double importedTaxRate;
 	
 	private double nonExemptedTaxRate;
@@ -34,8 +36,9 @@ class Taxes{
 		
 		calculateTaxRate(item);
 		
-		return taxRate*item.getPrice();
+		taxValue=taxRate*item.getPrice();
 		
+		return round(taxValue);		
 	}
 	
 	
@@ -59,27 +62,42 @@ class Taxes{
 		
 	}
 	
-	double getNonExemptedTaxRate() {
+	double getNonExemptedTaxRate() {                                                   
 		
 		return this.nonExemptedTaxRate;
 		
 	}
 	
-	//can be done in receipt
+	//
 	
-	/**double calculateTotalBeforeTax(Item item) {
+	
+	/**
+	 * 
+	 * @param taxAmount - the tax calculated until now
+	 * @return taxAmount rounded to the nearest 0.05
+	 */
+
+	public double round(double taxValue) {
 		
-		return item.getPrice()*(double)item.getQuantity();
+		//taking the whole number only
+		
+		int x = (int)(taxValue*10);
+		
+		//separating fractional part from whole number 
+		
+		double temp = (taxValue * 10) - (x);
+		
+		//rounding up or down based on value of fractional part
+		
+		if (temp < 0.25)	temp = 0.0;
+		else if (temp >= 0.25 && temp <= 0.50)	temp = 0.5;
+		else	temp = 1.0;
+
+		//adding rounded fractional part to original whole number
+		
+		return (temp + (double)x) / 10;
 		
 	}
-	
-	double calculateTax(Item item) {
-		
-		return calculateTaxRate(item)*item.getPrice();
-		
-	}
-	
-	*/
 	
 	
 }

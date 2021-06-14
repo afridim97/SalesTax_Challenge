@@ -15,16 +15,20 @@ public class ItemFactory {
 		if(name==null)
 			return null;
 		
-		if(name.equalsIgnoreCase("book") || name.equalsIgnoreCase("books"))
-			return new Book("book",0,0,false,true);
+		//formatting to ensure proper name of item gets printed
 		
-		if(name.equalsIgnoreCase("pill") || name.equalsIgnoreCase("pills"))
-			return new Medicine("medicine",0,0,false,true);
+		String itemName=name.substring(1,name.lastIndexOf("at")-1);
 		
-		if(name.equalsIgnoreCase("chocolate") || name.equalsIgnoreCase("chocolates"))
-			return new Food("food",0,0,false,true);
+		if(name.toLowerCase().contains("book") || name.toLowerCase().contains("books"))
+			return new Book(itemName,0,0,false,true);
+		
+		if(name.toLowerCase().contains("pill") || name.toLowerCase().contains("pills"))
+			return new Medicine(itemName,0,0,false,true);
+		
+		if(name.toLowerCase().contains("chocolate") || name.toLowerCase().contains("chocolates"))
+			return new Food(itemName,0,0,false,true);
 		else
-			return new Misc("other",0,0,false,false);
+			return new Misc(itemName,0,0,false,false);
 	
 	
 	}

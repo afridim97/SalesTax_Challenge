@@ -1,5 +1,4 @@
 
-import java.util.*;
 
 abstract class Item {
 
@@ -38,11 +37,6 @@ abstract class Item {
 		
 	}
 	
-    @Override
-	public String toString(){
-		return this.itemType+this.getPrice();
-	}
-
 	public double getPrice() {
 		return price;
 	}
