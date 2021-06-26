@@ -24,7 +24,7 @@ public abstract class Item {
 	
 	  public Item(String itemName, double price, int quantity, boolean imported, boolean exempted) {
 		
-		this.setItemType(itemName);
+		this.setItemName(itemName);
 		
 		this.setPrice(price);
 			
@@ -59,7 +59,7 @@ public abstract class Item {
 		return itemName;
 	}
 
-	public void setItemType(String itemName) {
+	public void setItemName(String itemName) {
 		this.itemName=itemName;
 	}
 	
